@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Фокус | Фарфоровый режим</title>
+  
+  <!-- Подключение Golos Text для интерфейса и весов для акцентов -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #f6f1ea;
+      --bg-warm: #efe7db;
+      --porcelain-bright: #ffffff;
+      --porcelain-matte: #fbf6ef;
+      --champagne: #a8844f;
+      --champagne-deep: #8f6b3e;
+      --champagne-bright: #d6b178;
+      --graphite: #1f1c19;
+      --graphite-soft: #35312d;
+      --graphite-muted: #5a534b;
+      --ease-premium: cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: "Golos Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      width: 100vw;
+      min-height: 100vh;
+      min-height: 100dvh;
+      color: var(--graphite);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 38%),
+        radial-gradient(circle at 50% 100%, rgba(193,160,107,0.08) 0%, rgba(193,160,107,0) 46%),
+        linear-gradient(180deg, var(--bg-base) 0%, var(--bg-warm) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom)) 16px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(255,255,255,0.55) 0%, transparent 26%),
+        radial-gradient(circle at 82% 78%, rgba(193,160,107,0.06) 0%, transparent 24%);
+      z-index: 0;
+    }
+
+    .shell {
+      width: min(100%, 460px);
+      position: relative;
+      z-index: 10;
+    }
+
+    .frame {
+      position: relative;
+      border-radius: 56px;
+      padding: 76px 22px 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.84) 0%, rgba(255,250,244,0.72) 100%);
+      box-shadow:
+        0 28px 80px rgba(120, 97, 67, 0.08),
+        0 10px 30px rgba(90, 70, 45, 0.05),
+        inset 0 1px 1px rgba(255,255,255,0.96);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.66);
+      overflow: hidden;
+      transition: transform 1s var(--ease-premium);
+    }
+
+    .audio-capsule {
+      position: absolute;
+      top: 22px;
+      right: 22px;
+      min-height: 38px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(255,255,255,0.96);
+      box-shadow: 0 8px 24px rgba(111, 88, 59, 0.08), inset 0 1px 0 rgba(255,255,255,0.92);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      z-index: 50;
+      transition: 0.25s var(--ease-premium);
+      user-select: none;
+    }
+
+    .audio-capsule span {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--graphite-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 0 auto 26px;
+      width: fit-content;
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(143, 107, 62, 0.9);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0 44px 0 10px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fff8f2 0%, #ecd4a6 42%, #cda468 100%);
+      box-shadow: 0 0 0 4px rgba(205, 164, 104, 0.08), 0 0 10px rgba(205, 164, 104, 0.12);
+    }
+
+    .lens-anchor {
+      width: 204px;
+      height: 204px;
+      margin: 0 auto 26px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%, rgba(185, 162, 132, 0.5) 0%, rgba(185, 162, 132, 0.2) 45%, transparent 75%);
+    }
+
+    .lens-ring {
+      position: absolute;
+      width: 154px;
+      height: 154px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: 0 15px 35px rgba(87, 71, 49, 0.15), inset 0 1px 0 rgba(255,255,255,0.8);
+      pointer-events: none;
+    }
+
+    .lens {
+      position: relative;
+      width: 132px;
+      height: 132px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 34% 26%, #fffefc 0%, #fcf8f0 35%, #f4ebd9 75%, #e6d8bc 100%);
+      box-shadow:
+        0 25px 45px rgba(87, 71, 49, 0.28),
+        0 8px 15px rgba(87, 71, 49, 0.15),
+        0 0 0 1px rgba(255,255,255,0.85),
+        inset 0 4px 12px rgba(255,255,255,0.98),
+        inset 0 -12px 20px rgba(192, 171, 136, 0.3);
+      z-index: 2;
+      transition: transform 1.2s var(--ease-premium), opacity 0.6s var(--ease-premium);
+      display: grid;
+      place-items: center;
+      animation: lens-drift 10s infinite ease-in-out;
+    }
+
+    .lens::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 24%, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.8) 15%, rgba(255,255,255,0) 45%);
+      pointer-events: none;
+    }
+
+    .lens::after {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.45);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), inset 0 -5px 10px rgba(179, 158, 126, 0.15);
+      pointer-events: none;
+    }
+
+    .core {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #4a4541 0%, #2c2824 72%, #171513 100%);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.1);
+      transition: transform 1s var(--ease-premium), width 0.6s, height 0.6s;
+    }
+
+    .card {
+      border-radius: 42px;
+      padding: 28px 24px 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(255,251,246,0.82) 100%);
+      box-shadow: 0 14px 34px rgba(107, 83, 56, 0.05), inset 0 1px 0 rgba(255,255,255,0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.7);
+      min-height: 218px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .eyebrow {
+      font-size: 13px;
+      font-family: "Iowan Old Style", "Georgia", serif;
+      font-weight: 700;
+      color: rgba(142, 110, 71, 1);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      min-height: 14px;
+    }
+
+    .phrase-wrap {
+      position: relative;
+      min-height: 112px;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .phrase {
+      width: 100%;
+      font-family: "Iowan Old Style", "Georgia", "Times New Roman", serif;
+      font-size: clamp(20px, 4.35vw, 24px);
+      font-weight: 400;
+      line-height: 1.42;
+      letter-spacing: -0.012em;
+      color: rgba(20, 18, 17, 0.96);
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.34s ease, transform 0.34s ease;
+      text-wrap: balance;
+      word-break: break-word;
+      max-width: 24ch;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .phrase.is-leaving { opacity: 0; transform: translateY(6px); }
+    .phrase.is-entering { opacity: 0; transform: translateY(-6px); }
+
+    .track {
+      height: 4px;
+      background: rgba(106, 86, 60, 0.08);
+      border-radius: 999px;
+      margin-top: 22px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.6);
+    }
+
+    .fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #c7a26b 0%, #a8844f 100%);
+      border-radius: inherit;
+      transition: width 0.1s linear;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    button {
+      min-height: 60px;
+      border-radius: 30px;
+      border: none;
+      font-family: "Golos Text", sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.35s var(--ease-premium);
+      appearance: none;
+    }
+
+    .btn-main {
+      background: linear-gradient(180deg, #2b2723 0%, #1f1c19 100%);
+      color: #f8f2ea;
+      padding: 0 28px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.11), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .btn-ghost {
+      background: rgba(255,255,255,0.82);
+      color: rgba(31, 28, 25, 0.9);
+      padding: 0 22px;
+      border: 1px solid rgba(106, 86, 60, 0.06);
+    }
+
+    button:active { transform: scale(0.98); }
+
+    .modal {
+      position: absolute;
+      inset: 14px;
+      border-radius: 44px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(251,246,239,0.98) 100%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 24px;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.96);
+      transition: all 0.45s var(--ease-premium);
+      box-shadow: 0 30px 70px rgba(0,0,0,0.1);
+    }
+
+    .modal.active { opacity: 1; pointer-events: auto; transform: scale(1); }
+
+    .input-box {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1.5px solid rgba(106, 86, 60, 0.18);
+      padding: 12px 0 14px;
+      font-size: 20px;
+      color: var(--graphite);
+      outline: none;
+      text-align: center;
+      margin-bottom: 30px;
+      font-family: "Golos Text", sans-serif;
+    }
+
+    @keyframes lens-drift {
+      0%, 100% { transform: translate(0, 0); }
+      33% { transform: translate(3px, 2px); }
+      66% { transform: translate(-2px, 3px); }
+    }
+
+    @keyframes scan-soft {
+      0%, 100% { transform: translateX(-42px); }
+      50% { transform: translateX(42px); }
+    }
+
+    .phase-scan .core { animation: scan-soft 2.6s ease-in-out infinite; }
+    .phase-focus .lens { transform: scale(1.1); }
+    .phase-sigh .lens { transform: scale(0.92); opacity: 0.92; }
+
+    @media (max-width: 420px) {
+      .frame { border-radius: 42px; padding: 70px 16px 16px; }
+      .phrase { font-size: 20px; line-height: 1.4; max-width: 23ch; }
+      .controls { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="frame" id="app">
+    <div class="audio-capsule" id="noiseBtn" onclick="toggleNoise()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+      </svg>
+      <span>Шум</span>
+    </div>
+
+    <div class="status-badge"><div class="dot"></div>Фарфоровый режим</div>
+
+    <div class="lens-anchor">
+      <div class="lens-ring"></div>
+      <div class="lens"><div class="core" id="core"></div></div>
+    </div>
+
+    <div class="card" id="mainCard">
+      <div class="eyebrow" id="label">Сброс кортизола</div>
+      <div class="phrase-wrap">
+        <div class="phrase" id="phrase">Настройка мягкого внимания перед важным делом.</div>
+      </div>
+      <div class="track"><div class="fill" id="progress"></div></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn-main" onclick="handleRitual()" id="mainBtn">Начать</button>
+      <button class="btn-ghost" onclick="toggleModal()">Микро-цель</button>
+    </div>
+
+    <div class="modal" id="modal">
+      <input type="text" class="input-box" id="taskInput" placeholder="Что ты закончишь сейчас?" />
+      <button class="btn-main" onclick="saveTask()">Запомнить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const phases = [
+    { label: "Замедление", text: "Позволь взгляду мягко следовать за движением.", dur: 18000, cls: "phase-scan" },
+    { label: "Центр", text: "Верни внимание в одну точку. Без усилия.", dur: 22000, cls: "phase-focus" },
+    { label: "Выдох", text: "Сделай мягкий двойной вдох и длинный спокойный выдох.", dur: 16000, cls: "phase-sigh" },
+    { label: "Действие", text: "Фокус собран. Теперь оставь только одно маленькое дело.", dur: 10000, cls: "" }
+  ];
+
+  let cur = 0;
+  let running = false;
+  let paused = false;
+  let timer = null;
+  let pendingSwap = null;
+  let phaseStart = 0;
+  let phaseRemaining = 0;
+
+  const app = document.getElementById("app");
+  const label = document.getElementById("label");
+  const phrase = document.getElementById("phrase");
+  const fill = document.getElementById("progress");
+  const mainBtn = document.getElementById("mainBtn");
+
+  function handleRitual() {
+    if (!running) { start(); return; }
+    if (paused) resume(); else pause();
+  }
+
+  function start() {
+    running = true; paused = false; cur = 0;
+    mainBtn.innerText = "Пауза";
+    runPhase(cur);
+  }
+
+  function pause() {
+    paused = true; clearInterval(timer);
+    if (pendingSwap) { clearTimeout(pendingSwap); pendingSwap = null; }
+    phaseRemaining = Math.max(0, phaseRemaining - (Date.now() - phaseStart));
+    mainBtn.innerText = "Продолжить";
+  }
+
+  function resume() {
+    paused = false; mainBtn.innerText = "Пауза";
+    continuePhase();
+  }
+
+  function setPhrase(nextText) {
+    phrase.classList.add("is-leaving");
+    pendingSwap = setTimeout(() => {
+      phrase.textContent = nextText;
+      phrase.classList.remove("is-leaving");
+      phrase.classList.add("is-entering");
+      setTimeout(() => phrase.classList.remove("is-entering"), 50);
+    }, 180);
+  }
+
+  function runPhase(index) {
+    const phase = phases[index];
+    phaseRemaining = phase.dur;
+    label.textContent = phase.label;
+    setPhrase(phase.text);
+    app.className = "frame " + (phase.cls || "");
+    continuePhase();
+  }
+
+  function continuePhase() {
+    const phase = phases[cur];
+    phaseStart = Date.now();
+    const total = phaseRemaining;
+    clearInterval(timer);
+    timer = setInterval(() => {
+      const elapsed = Date.now() - phaseStart;
+      const progress = Math.min((elapsed / total) * 100, 100);
+      fill.style.width = progress + "%";
+      if (elapsed >= total) {
+        clearInterval(timer);
+        cur++;
+        if (cur < phases.length) runPhase(cur); else stop();
+      }
+    }, 50);
+  }
+
+  function stop() {
+    running = false; fill.style.width = "0%";
+    mainBtn.innerText = "Начать";
+    label.innerText = "Готовность";
+    setPhrase("Настройка завершена. Пора действовать.");
+    app.className = "frame";
+  }
+
+  function toggleModal() {
+    const m = document.getElementById("modal");
+    const isActive = m.classList.toggle("active");
+    if (isActive) setTimeout(() => document.getElementById("taskInput").focus(), 220);
+  }
+
+  function saveTask() {
+    const val = document.getElementById("taskInput").value.trim();
+    if (val) setPhrase("Твоя цель: " + val);
+    toggleModal();
+  }
+
+  let audioCtx, noiseGain, isNoise = false;
+  function toggleNoise() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const bSize = 4096;
+      let lastOut = 0.0;
+      const noiseSource = audioCtx.createScriptProcessor(bSize, 1, 1);
+      noiseSource.onaudioprocess = (e) => {
+        const out = e.outputBuffer.getChannelData(0);
+        for (let i = 0; i < bSize; i++) {
+          const white = Math.random() * 2 - 1;
+          out[i] = (lastOut + 0.02 * white) / 1.02;
+          lastOut = out[i];
+          out[i] *= 2.4;
+        }
+      };
+      noiseGain = audioCtx.createGain();
+      noiseGain.gain.value = 0;
+      noiseSource.connect(noiseGain);
+      noiseGain.connect(audioCtx.destination);
+    }
+    isNoise = !isNoise;
+    document.getElementById("noiseBtn").classList.toggle("active", isNoise);
+    noiseGain.gain.setTargetAtTime(isNoise ? 0.042 : 0, audioCtx.currentTime, 1.1);
+  }
+</script>
+</body>
+</html>
